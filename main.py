@@ -27,7 +27,7 @@ y = np.array(y.values)
 x_train = x[:488]
 x_test = x[488:]
 y_train = y[:488]
-y_test = y[488]
+y_test = y[488:]
 
 print x_train.shape
 
@@ -55,27 +55,25 @@ inpt_train_y = Variable(inpt_train_y, requires_grad=False)
 model = torch.nn.Sequential(
     torch.nn.Linear(9, 10),
     torch.nn.ReLU(),
-    torch.nn.Linear(10, 1),
+    torch.nn.Linear(10, 10),
+    torch.nn.ReLU(),
+    torch.nn.Linear(10,1)
 )
 
 loss_fn = torch.nn.MSELoss(size_average=False)
 
 learning_rate = 1e-4
 
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 for t in range(10000):
 
     y_pred = model(inpt_train_x)
-
     loss = loss_fn(y_pred, inpt_train_y)
-    if t%100 == 0:
+    if t%1000 == 0:
         print(t, loss.data[0])
-
-    model.zero_grad()
-
+    optimizer.zero_grad()
     loss.backward()
-
-    for param in model.parameters():
-        param.data -= learning_rate * param.grad.data
+    optimizer.step()
 
 
 inpt_test_x = torch.from_numpy(x_train)
@@ -90,7 +88,7 @@ for index in array:
     else:
         new_array.append(0)
 new_array = np.array(new_array)
-error = y_test - new_array
+error = y_train - new_array
 
 deep_acc = accuracy(error) *100
 
